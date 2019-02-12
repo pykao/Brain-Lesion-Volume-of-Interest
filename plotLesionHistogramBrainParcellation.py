@@ -1,0 +1,85 @@
+'''
+@author: pkao
+
+This code plots the histogram of different lesions in different brain parcellation regions
+'''
+
+import matplotlib
+matplotlib.use('Agg')
+import SimpleITK as sitk
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+
+def lesionHistogramBP(heatmap_location, brainparcellation_location, MNI152_brain_mask_location, nameOfHeatmap):
+	''' output the histogram of different lesions in differnt brain parcellation'''
+
+	# get the numpy array from brain parcellation in MNI152 space
+	BP_img = sitk.ReadImage(brainparcellation_location)
+	BP_nda = sitk.GetArrayFromImage(BP_img)
+
+	print 'Brain parcellation has ' + str(np.amax(BP_nda).astype(int)) + ' subregions.'
+
+
+	# get the numpy array from heat maps in MNI152 space
+
+	heatmap_img = sitk.ReadImage(heatmap_location)
+	heatmap_nda = sitk.GetArrayFromImage(heatmap_img)
+
+        MNI152_brain_mask_img = sitk.ReadImage(MNI152_brain_mask_location)
+        MNI152_brain_mask_nda = sitk.GetArrayFromImage(MNI152_brain_mask_img)
+
+        #print MNI152_brain_mask_nda.shape
+        
+	hist_lesion = np.zeros(np.amax(BP_nda).astype(int)+1)
+	bp_regions = np.zeros(np.amax(BP_nda).astype(int)+1)
+        
+        for i in range(np.amax(BP_nda).astype(int)+1):
+            if i == 0:
+                bp_regions[i] = np.count_nonzero(np.logical_and(MNI152_brain_mask_nda, BP_nda == 0))
+
+            if i != 0:
+                bp_regions[i] = np.count_nonzero(BP_nda == i)
+
+        #print bp_regions 
+
+
+
+
+	for i in range(BP_nda.shape[0]):
+		for j in range(BP_nda.shape[1]):
+			for k in range(BP_nda.shape[2]):
+				if heatmap_nda[i,j,k] > 0:
+                                    hist_lesion[BP_nda[i,j,k].astype(int)] = hist_lesion[BP_nda[i,j,k].astype(int)] + heatmap_nda[i,j,k]
+
+        print 'Normalized histogram for ' + nameOfHeatmap + ' brain parcellation subregions: '
+	
+        normalized_hist_lesion =  np.divide(hist_lesion, bp_regions)
+	
+        print normalized_hist_lesion
+        plt.figure()
+	plt.bar(np.arange(len(normalized_hist_lesion)), normalized_hist_lesion, align='center', alpha=0.5)
+	plt.ylabel('Normalzed Number of Voxel')
+	plt.xticks(np.arange(len(hist_lesion)))
+    	plt.title('Normalized histogram for ' + nameOfHeatmap + ' in HarvardOxford')
+	plt.legend(loc = 'best')
+	plt.savefig('The_normalized_histogram_for_' + nameOfHeatmap + '_in_HarvardOxford_parcellation_subregions.png')
+
+
+#BPlocation = '/usr/share/fsl/data/atlases/HarvardOxford/HarvardOxford-sub-maxprob-thr0-1mm.nii.gz'
+BPlocation = './BrainParcellations/VOI.nii.gz'
+
+heatMapsLocation = './heatmaps/'
+MNI152_brain_mask_location = './MNI152_T1_1mm_brain_mask.nii.gz'
+
+#completeTumorHeatMap = os.path.join(heatMapsLocation, 'heatmapCompleteTumorMNI152.nii.gz')
+#tumorCoreHeatMap = os.path.join(heatMapsLocation, 'heatmapTumorCoreMNI152.nii.gz')
+edemaHeatMap = os.path.join(heatMapsLocation, 'edema_heatmap.nii.gz')
+enhancingTumorHeatMap = os.path.join(heatMapsLocation, 'tumor_heatmap.nii.gz')
+necrosisHeatMap = os.path.join(heatMapsLocation, 'necrosis_heatmap.nii.gz')
+
+#lesionHistogramBP(completeTumorHeatMap, BPlocation, MNI152_brain_mask_location, 'Complete Tumor')
+#lesionHistogramBP(tumorCoreHeatMap,BPlocation, MNI152_brain_mask_location, 'Tumor Core')
+lesionHistogramBP(edemaHeatMap,BPlocation, MNI152_brain_mask_location, 'Edema')
+lesionHistogramBP(enhancingTumorHeatMap, BPlocation, MNI152_brain_mask_location, 'Enhancing Tumor')
+lesionHistogramBP(necrosisHeatMap, BPlocation, MNI152_brain_mask_location, 'Necrosis')

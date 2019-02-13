@@ -42,12 +42,20 @@ def SubjectLabels2ParcellationArgmax(subject_bp_filepaths, subject_name):
     brainParcellationFloat_img.CopyInformation(img)
     sitk.WriteImage(brainParcellationFloat_img, subject_name)
 
-dest_path = paths.brats2018_training_path
+#dest_path = paths.brats2018_training_path
+dest_path = paths.brats2018_validation_path
+
+valid_dir = './valid'
+if not os.path.exist(valid_dir):
+    os.mkdir(valid_dir)
+if 'valid' in dest_path:
+    output_dir = valid_dir
+
 
 train_dir = './train'
 if not os.path.exists(train_dir):
 	os.mkdir(train_dir)
-if 'train' in train_dir:
+if 'train' in dest_path:
 	output_dir = train_dir
 
 refvol2invol_paths = [os.path.join(root, name) for root, dirs, files in os.walk(dest_path) for name in files if 'refvol2invol' in name and name.endswith('.mat')]

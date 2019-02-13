@@ -18,28 +18,25 @@ def lesionHistogramBP(heatmap_location, brainparcellation_location, MNI152_brain
 	BP_img = sitk.ReadImage(brainparcellation_location)
 	BP_nda = sitk.GetArrayFromImage(BP_img)
 
-	print 'Brain parcellation has ' + str(np.amax(BP_nda).astype(int)) + ' subregions.'
+	print('Brain parcellation has ' + str(np.amax(BP_nda).astype(int)) + ' subregions.')
 
 
 	# get the numpy array from heat maps in MNI152 space
 
 	heatmap_img = sitk.ReadImage(heatmap_location)
 	heatmap_nda = sitk.GetArrayFromImage(heatmap_img)
+	MNI152_brain_mask_img = sitk.ReadImage(MNI152_brain_mask_location)
+	MNI152_brain_mask_nda = sitk.GetArrayFromImage(MNI152_brain_mask_img)
 
-        MNI152_brain_mask_img = sitk.ReadImage(MNI152_brain_mask_location)
-        MNI152_brain_mask_nda = sitk.GetArrayFromImage(MNI152_brain_mask_img)
-
-        #print MNI152_brain_mask_nda.shape
+    #print MNI152_brain_mask_nda.shape
         
 	hist_lesion = np.zeros(np.amax(BP_nda).astype(int)+1)
 	bp_regions = np.zeros(np.amax(BP_nda).astype(int)+1)
-        
-        for i in range(np.amax(BP_nda).astype(int)+1):
-            if i == 0:
-                bp_regions[i] = np.count_nonzero(np.logical_and(MNI152_brain_mask_nda, BP_nda == 0))
-
-            if i != 0:
-                bp_regions[i] = np.count_nonzero(BP_nda == i)
+	for i in range(np.amax(BP_nda).astype(int)+1):
+		if i == 0:
+			bp_regions[i] = np.count_nonzero(np.logical_and(MNI152_brain_mask_nda, BP_nda == 0))
+		if i != 0:
+			bp_regions[i] = np.count_nonzero(BP_nda == i)
 
         #print bp_regions 
 
@@ -50,27 +47,29 @@ def lesionHistogramBP(heatmap_location, brainparcellation_location, MNI152_brain
 		for j in range(BP_nda.shape[1]):
 			for k in range(BP_nda.shape[2]):
 				if heatmap_nda[i,j,k] > 0:
-                                    hist_lesion[BP_nda[i,j,k].astype(int)] = hist_lesion[BP_nda[i,j,k].astype(int)] + heatmap_nda[i,j,k]
-
-        print 'Normalized histogram for ' + nameOfHeatmap + ' brain parcellation subregions: '
+					hist_lesion[BP_nda[i,j,k].astype(int)] = hist_lesion[BP_nda[i,j,k].astype(int)] + heatmap_nda[i,j,k]
+	print('Normalized histogram for ' + nameOfHeatmap + ' brain parcellation subregions: ')
 	
-        normalized_hist_lesion =  np.divide(hist_lesion, bp_regions)
+	normalized_hist_lesion =  np.divide(hist_lesion, bp_regions)
 	
-        print normalized_hist_lesion
-        plt.figure()
+	print(normalized_hist_lesion)
+	plt.figure()
 	plt.bar(np.arange(len(normalized_hist_lesion)), normalized_hist_lesion, align='center', alpha=0.5)
 	plt.ylabel('Normalzed Number of Voxel')
 	plt.xticks(np.arange(len(hist_lesion)))
-    	plt.title('Normalized histogram for ' + nameOfHeatmap + ' in HarvardOxford')
+	plt.title('Normalized histogram for ' + nameOfHeatmap + ' in HarvardOxford')
 	plt.legend(loc = 'best')
-	plt.savefig('The_normalized_histogram_for_' + nameOfHeatmap + '_in_HarvardOxford_parcellation_subregions.png')
+	plt.savefig('./histogram/The_normalized_histogram_for_' + nameOfHeatmap + '_in_HarvardOxford_parcellation_subregions.png')
 
 
 #BPlocation = '/usr/share/fsl/data/atlases/HarvardOxford/HarvardOxford-sub-maxprob-thr0-1mm.nii.gz'
-BPlocation = './BrainParcellations/VOI.nii.gz'
+BPlocation = './VOI/VOI-1mm.nii.gz'
 
 heatMapsLocation = './heatmaps/'
-MNI152_brain_mask_location = './MNI152_T1_1mm_brain_mask.nii.gz'
+MNI152_brain_mask_location = './MNI152_T1_1mm_brain.nii.gz'
+
+if not os.path.exists('./histogram'):
+	os.mkdir('./histogram')
 
 #completeTumorHeatMap = os.path.join(heatMapsLocation, 'heatmapCompleteTumorMNI152.nii.gz')
 #tumorCoreHeatMap = os.path.join(heatMapsLocation, 'heatmapTumorCoreMNI152.nii.gz')

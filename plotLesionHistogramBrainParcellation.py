@@ -66,7 +66,7 @@ def lesionHistogramBP(heatmap_location, brainparcellation_location, MNI152_brain
 BPlocation = './VOI/VOI-1mm.nii.gz'
 
 heatMapsLocation = './heatmaps/'
-MNI152_brain_mask_location = './MNI152_T1_1mm_brain.nii.gz'
+MNI152_brain_mask_location = './MNI152_T1_1mm_brain_mask.nii.gz'
 
 if not os.path.exists('./histogram'):
 	os.mkdir('./histogram')

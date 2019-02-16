@@ -46,7 +46,7 @@ def SubjectLabels2ParcellationArgmax(subject_bp_filepaths, subject_name):
 dest_path = paths.brats2018_validation_path
 
 valid_dir = './valid'
-if not os.path.exist(valid_dir):
+if not os.path.exists(valid_dir):
     os.mkdir(valid_dir)
 if 'valid' in dest_path:
     output_dir = valid_dir

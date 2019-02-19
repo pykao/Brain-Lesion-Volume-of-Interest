@@ -51,7 +51,7 @@ VOI_img.CopyInformation(edema_heatmap_img)
 
 VOI_path = './VOI'
 if not os.path.exists(VOI_path):
-	os.mkdir(VOI_path)
+	os.makedirs(VOI_path)
 
 sitk.WriteImage(VOI_img, os.path.join(VOI_path, 'VOI-1mm.nii.gz'))
 

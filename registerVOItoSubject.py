@@ -45,16 +45,16 @@ def SubjectLabels2ParcellationArgmax(subject_bp_filepaths, subject_name):
 #dest_path = paths.brats2018_training_path
 dest_path = paths.brats2018_validation_path
 
-valid_dir = './valid'
+valid_dir = './VOI-1mm/valid'
 if not os.path.exists(valid_dir):
-    os.mkdir(valid_dir)
+    os.makedirs(valid_dir)
 if 'valid' in dest_path:
     output_dir = valid_dir
 
 
-train_dir = './train'
+train_dir = './VOI-1mm/train'
 if not os.path.exists(train_dir):
-	os.mkdir(train_dir)
+	os.makedirs(train_dir)
 if 'train' in dest_path:
 	output_dir = train_dir
 
@@ -77,7 +77,7 @@ for i in range(len(refVol_paths)):
 	temp_dir = os.path.join('./temp')
 
 	if not os.path.exists(temp_dir):
-		os.mkdir(temp_dir)
+		os.makedirs(temp_dir)
 	RegisterLabels2Subject(refVol_paths[i], voi_filepaths, refvol2invol_paths[i], temp_dir)
 	subject_bp_filepaths = [os.path.join(root, name) for root, dirs, files in os.walk(temp_dir) for name in files if 'lab' in name and name.endswith('.nii.gz')]
 	subject_bp_filepaths = natsorted(subject_bp_filepaths, key=lambda y: y.lower())

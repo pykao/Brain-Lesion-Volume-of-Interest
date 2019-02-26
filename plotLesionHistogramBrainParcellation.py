@@ -52,14 +52,15 @@ def lesionHistogramBP(heatmap_location, brainparcellation_location, MNI152_brain
 	
 	normalized_hist_lesion =  np.divide(hist_lesion, bp_regions)
 	
-	print(normalized_hist_lesion)
+	'''print(normalized_hist_lesion)
 	plt.figure()
 	plt.bar(np.arange(len(normalized_hist_lesion)), normalized_hist_lesion, align='center', alpha=0.5)
 	plt.ylabel('Normalzed Number of Voxel')
 	plt.xticks(np.arange(len(hist_lesion)))
 	plt.title('Normalized histogram for ' + nameOfHeatmap + ' in HarvardOxford')
-	plt.legend(loc = 'best')
 	plt.savefig('./histogram/The_normalized_histogram_for_' + nameOfHeatmap + '_in_HarvardOxford_parcellation_subregions.png')
+	plt.clf()'''
+	return normalized_hist_lesion
 
 
 #BPlocation = '/usr/share/fsl/data/atlases/HarvardOxford/HarvardOxford-sub-maxprob-thr0-1mm.nii.gz'
@@ -79,6 +80,38 @@ necrosisHeatMap = os.path.join(heatMapsLocation, 'necrosis_heatmap.nii.gz')
 
 #lesionHistogramBP(completeTumorHeatMap, BPlocation, MNI152_brain_mask_location, 'Complete Tumor')
 #lesionHistogramBP(tumorCoreHeatMap,BPlocation, MNI152_brain_mask_location, 'Tumor Core')
-lesionHistogramBP(edemaHeatMap,BPlocation, MNI152_brain_mask_location, 'Edema')
-lesionHistogramBP(enhancingTumorHeatMap, BPlocation, MNI152_brain_mask_location, 'Enhancing Tumor')
-lesionHistogramBP(necrosisHeatMap, BPlocation, MNI152_brain_mask_location, 'Necrosis')
+normalized_histogram_edema = lesionHistogramBP(edemaHeatMap,BPlocation, MNI152_brain_mask_location, 'Edema')
+normalized_histogram_tumor = lesionHistogramBP(enhancingTumorHeatMap, BPlocation, MNI152_brain_mask_location, 'Enhancing Tumor')
+normalized_histogram_necrosis = lesionHistogramBP(necrosisHeatMap, BPlocation, MNI152_brain_mask_location, 'Necrosis')
+
+n_regions = 10
+
+fig, ax = plt.subplots()
+index = np.arange(n_regions)
+bar_width = 0.2
+opacity = 0.6
+
+
+plt.figure()
+rects1 = plt.bar(index , normalized_histogram_necrosis, bar_width, 
+                 alpha=opacity,
+                 color='b',
+                 label='Necrosis & Non-Enhancing Tumor')
+
+rects2 = plt.bar(index + bar_width, normalized_histogram_edema, bar_width,
+                 alpha=opacity,
+                 color='g',
+                 label='Edema')
+
+rects3 = plt.bar(index - bar_width, normalized_histogram_tumor, bar_width,
+                 alpha=opacity,
+                 color='r',
+                 label='Enhancing Tumor')
+plt.xlabel('Voxel-of-Interest Map Label', size=25)
+plt.ylabel('Percentage', size=25)
+plt.legend(loc = 'best', fontsize=10)
+plt.xticks(np.arange(n_regions), size = 20)
+plt.yticks(np.arange(0, 30, 5), size = 15)
+plt.tight_layout()
+plt.show()
+plt.savefig('./histogram/VOI_histogram.png')
